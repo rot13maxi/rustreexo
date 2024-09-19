@@ -305,28 +305,28 @@ impl Pollard {
     ///
     /// # Example
     /// ```
-    /// use bitcoin_hashes::sha256::Hash as Data;
-    /// use bitcoin_hashes::Hash;
-    /// use bitcoin_hashes::HashEngine;
-    /// use rustreexo::accumulator::node_hash::NodeHash;
-    /// use rustreexo::accumulator::pollard::Pollard;
-    /// let values = vec![0, 1, 2, 3, 4, 5, 6, 7];
-    /// let hashes = values
-    ///     .into_iter()
-    ///     .map(|val| {
-    ///         let mut engine = Data::engine();
-    ///         engine.input(&[val]);
-    ///         NodeHash::from(Data::from_engine(engine).as_byte_array())
-    ///     })
-    ///     .collect::<Vec<_>>();
-    /// // Add 8 leaves to the pollard
-    /// let mut p = Pollard::new();
-    /// p.modify(&hashes, &[]).expect("Pollard should not fail");
+    /// use sha2::{Sha256, Digest};
+    ///  use rustreexo::accumulator::node_hash::NodeHash;
+    ///  use rustreexo::accumulator::pollard::Pollard;
     ///
-    /// assert_eq!(
-    ///     p.get_roots()[0].get_data().to_string(),
-    ///     String::from("b151a956139bb821d4effa34ea95c17560e0135d1e4661fc23cedc3af49dac42")
-    /// );
+    ///  let values = vec![0, 1, 2, 3, 4, 5, 6, 7];
+    ///  let hashes = values
+    ///  .into_iter()
+    ///  .map(|val| {
+    ///  let mut hasher = Sha256::new();
+    ///  hasher.update(&[val]);
+    ///  NodeHash::from(hasher.finalize().as_slice())
+    ///   })
+    ///   .collect::<Vec<_>>();
+    ///
+    ///   // Add 8 leaves to the pollard
+    ///   let mut p = Pollard::new();
+    ///  p.modify(&hashes, &[]).expect("Pollard should not fail");
+    ///
+    ///   assert_eq!(
+    ///       p.get_roots()[0].get_data().to_string(),
+    ///       String::from("b151a956139bb821d4effa34ea95c17560e0135d1e4661fc23cedc3af49dac42")
+    ///   );
     /// ```
     pub fn modify(&mut self, add: &[NodeHash], del: &[NodeHash]) -> Result<(), String> {
         self.del(del)?;
@@ -627,23 +627,14 @@ mod test {
     use std::str::FromStr;
     use std::vec;
 
-    use bitcoin_hashes::sha256::Hash as Data;
-    use bitcoin_hashes::Hash;
-    use bitcoin_hashes::HashEngine;
     use serde::Deserialize;
 
     use super::Pollard;
     use crate::accumulator::node_hash::NodeHash;
     use crate::accumulator::pollard::Node;
     use crate::accumulator::proof::Proof;
+    use crate::accumulator::util::hash_from_u8;
 
-    fn hash_from_u8(value: u8) -> NodeHash {
-        let mut engine = Data::engine();
-
-        engine.input(&[value]);
-
-        NodeHash::from(Data::from_engine(engine).as_byte_array())
-    }
     #[test]
     fn test_grab_node() {
         let values = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];

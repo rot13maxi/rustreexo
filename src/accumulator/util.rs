@@ -306,15 +306,13 @@ pub fn get_proof_positions(targets: &[u64], num_leaves: u64, forest_rows: u8) ->
 }
 #[cfg(any(test, bench))]
 pub fn hash_from_u8(value: u8) -> NodeHash {
-    use bitcoin_hashes::sha256;
-    use bitcoin_hashes::Hash;
-    use bitcoin_hashes::HashEngine;
-    let mut engine = bitcoin_hashes::sha256::Hash::engine();
-
-    engine.input(&[value]);
-
-    sha256::Hash::from_engine(engine).into()
+    use sha2::{Digest, Sha256};
+    let mut hasher = Sha256::new();
+    hasher.update(&[value]);
+    let result = hasher.finalize();
+    NodeHash::from(<[u8; 32]>::from(result))
 }
+
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;

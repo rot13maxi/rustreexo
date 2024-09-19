@@ -11,8 +11,12 @@ homepage = "https://github.com/mit-dci/rustreexo"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-bitcoin_hashes = "0.14"
+hex = "0.4.3"
 serde = { version = "1.0", features = ["derive"], optional = true }
+
+[dependencies.sha2]
+git = "https://github.com/risc0/RustCrypto-hashes"
+tag = "sha2-v0.10.8-risczero.0"
 
 [dev-dependencies]
 serde = { version = "1.0", features = ["derive"] }

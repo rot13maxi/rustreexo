@@ -5,13 +5,11 @@
 //! ## Example
 //! ```
 //! use std::str::FromStr;
-//!
-//! use bitcoin_hashes::sha256;
-//! use bitcoin_hashes::Hash;
-//! use bitcoin_hashes::HashEngine;
+//! use sha2::{Sha256, Digest};
 //! use rustreexo::accumulator::node_hash::NodeHash;
 //! use rustreexo::accumulator::proof::Proof;
 //! use rustreexo::accumulator::stump::Stump;
+//!
 //! let s = Stump::new();
 //! // Creates a tree with those values as leaves
 //! let test_values: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
@@ -37,9 +35,9 @@
 //! // Hashes of the leaves UTXOs we'll add to the accumulator
 //! let mut hashes = Vec::new();
 //! for i in test_values {
-//!     let mut engine = sha256::Hash::engine();
-//!     engine.input(&[i]);
-//!     hashes.push(sha256::Hash::from_engine(engine).into())
+//!     let mut hasher = Sha256::new();
+//!     hasher.update(&[i]);
+//!     hashes.push(NodeHash::from(hasher.finalize().as_slice()));
 //! }
 //! // Add the UTXOs to the accumulator
 //! let s = s.modify(&hashes, &vec![], &Proof::default()).unwrap().0;
@@ -130,8 +128,6 @@ impl Proof {
     /// proof, in this case 00, 08, 12 and 14.
     /// # Example
     /// ```
-    /// use bitcoin_hashes::Hash;
-    /// use bitcoin_hashes::HashEngine;
     /// use rustreexo::accumulator::node_hash::NodeHash;
     /// use rustreexo::accumulator::proof::Proof;
     /// let targets = vec![0];
@@ -151,10 +147,7 @@ impl Proof {
     ///# Examples
     /// ```
     /// use std::str::FromStr;
-    ///
-    /// use bitcoin_hashes::sha256;
-    /// use bitcoin_hashes::Hash;
-    /// use bitcoin_hashes::HashEngine;
+    /// use sha2::{Sha256, Digest};
     /// use rustreexo::accumulator::node_hash::NodeHash;
     /// use rustreexo::accumulator::proof::Proof;
     /// use rustreexo::accumulator::stump::Stump;
@@ -163,7 +156,6 @@ impl Proof {
     /// let test_values: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
     /// // Targets are the nodes we intend to prove
     /// let targets = vec![0];
-    ///
     /// let mut proof_hashes = Vec::new();
     /// // This tree will look like this
     /// // 14
@@ -186,12 +178,11 @@ impl Proof {
     ///     NodeHash::from_str("29590a14c1b09384b94a2c0e94bf821ca75b62eacebc47893397ca88e3bbcbd7")
     ///         .unwrap(),
     /// );
-    ///
     /// let mut hashes = Vec::new();
     /// for i in test_values {
-    ///     let mut engine = sha256::Hash::engine();
-    ///     engine.input(&[i]);
-    ///     hashes.push(sha256::Hash::from_engine(engine).into())
+    ///     let mut hasher = Sha256::new();
+    ///     hasher.update(&[i]);
+    ///     hashes.push(NodeHash::from(hasher.finalize().as_slice()));
     /// }
     /// let s = s.modify(&hashes, &vec![], &Proof::default()).unwrap().0;
     /// let p = Proof::new(targets, proof_hashes);
